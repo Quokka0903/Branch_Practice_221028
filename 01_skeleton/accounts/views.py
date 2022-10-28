@@ -10,7 +10,7 @@ from django.http.response import JsonResponse
 
 from .forms import CustomUserChangeForm, CustomUserCreationForm
 
-
+# 여기에 코드를 작성 하알까 마알까 하알까 마알까
 # Create your views here.
 @require_http_methods(['GET', 'POST'])
 def login(request):
@@ -118,6 +118,11 @@ def follow(request, user_pk):
         me = request.user
         you = get_object_or_404(get_user_model(), pk=user_pk)
 
+        #print('me')
+        #print(me)
+        #print('you')
+        #print(you)
+
         if me != you:
             if you.followers.filter(pk=me.pk).exists():
                 you.followers.remove(me)
@@ -126,8 +131,11 @@ def follow(request, user_pk):
                 you.followers.add(me)
                 is_followed = True
 
+            follow_count = you.followers.count()
+
             context = {
                 'is_followed': is_followed,
+                'follow_count' : follow_count
             }
             return JsonResponse(context)
         #return redirect('accounts:profile', you.username)
