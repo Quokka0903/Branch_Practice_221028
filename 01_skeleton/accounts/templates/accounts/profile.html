@@ -3,12 +3,12 @@
 {% block content %}
   <h1>{{ person.username }}님의 프로필</h1>
   <div>
-    팔로워 : {{ person.followers.all|length }} / 팔로잉 : {{ person.followings.all|length }}
+    팔로워 : <span id="followersCnt">{{ person.followers.all|length }}</span> / 팔로잉 : <span id="followingCnt">{{ person.followings.all|length }}</span>
   </div>
 
   {% if request.user != person %}
   <div>
-    <form id="follow-form" data-user-id = {{ person.id }}>
+    <form id="follow_form" data-user-id = {{ person.id }}>
       {% csrf_token %}
       {% if request.user in person.followers.all %}
         <input type="submit" value="언팔로우">
@@ -39,41 +39,47 @@
   {% endfor %}
 
   <a href="{% url 'articles:index' %}">back</a>
-{% endblock content %}
-
-{% block script %}
-
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>>
-<script>
-  window.onload = function(){
-
   
-  const followForm = document.querySelector('#follow_form')
-  const csrfToken = document.querySelector('[name=scrfmiddlewaretoken]').value // 항상 변하는 값
+  {% block script %}
+  
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>>
+  <script>
+    window.onload = function(){
+      
+      const followForm = document.querySelector('#follow_form')
+      const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value // 항상 변하는 값
+      //console.log(followForm)
+      console.log(csrfToken)
 
-  followForm.addEventListener('submit', function(event){
-    //console.log(event) // 확인하는 습관 들이기
-    event.preventDefault()
-    const userId = event.target.dataset.userId
-    //console.log(userId) // 확인하는 습관 들이기
 
-    axios({
-      method: 'POST',
-      url: '/accounts/${userId}/follow',
-      header: {'X-CRSFToken': csrfToken},
-    })
-    .then(response => {
-      console.log(userId)
-      const isFollwed = response.data.is_followed
-      const followBtn = document.querySelector('#follow-form > input[type=submit]')
-      if (isFollwed == true) {
-        followBtn.value = '언팔로우'
-      } else {
-        followBtn.value = '팔로우'
-      }
-    })
-  })
-  }
+      followForm.addEventListener('submit', function(event){
+        //console.log(event) // 확인하는 습관 들이기
+        event.preventDefault()
+        const userId = event.target.dataset.userId
+        //console.log(userId) // 확인하는 습관 들이기
+        
+        axios({
+          method: 'POST',
+          url: `/accounts/${userId}/follow/`,
+          headers: {'X-CSRFToken': csrfToken},
+        })
+        .then(response => {
+          //console.log(userId)
+          const isFollwed = response.data.is_followed
+          const followBtn = document.querySelector('#follow_form > input[type=submit]')
+          const followCnt = document.querySelector('#followersCnt')
+          //console.log(followBtn)
+          if (isFollwed == true) {
+            followBtn.value = '언팔로우'
+          } else {
+            followBtn.value = '팔로우'
+          }
+          followCnt.innerText = response.data.follow_count
+        })
+      })
+    }
 </script>
 
 {% endblock script %}
+
+{% endblock content %}
