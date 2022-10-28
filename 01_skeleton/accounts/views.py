@@ -10,7 +10,7 @@ from django.http.response import JsonResponse
 
 from .forms import CustomUserChangeForm, CustomUserCreationForm
 
-
+# 여기에 코드를 작성 하알까 마알까 하알까 마알까
 # Create your views here.
 @require_http_methods(['GET', 'POST'])
 def login(request):
