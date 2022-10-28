@@ -14,7 +14,7 @@
     <p>제목 : {{ article.title }}</p>
     <p>내용 : {{ article.content }}</p>
     <div>
-      <form action="{% url 'articles:likes' article.pk %}" method="POST">
+      <form id="like_form" data-article-id={{ article.pk }}>
         {% csrf_token %}
         {% if request.user in article.like_users.all %}
           <input type="submit" value="좋아요 취소">
@@ -26,4 +26,38 @@
     <a href="{% url 'articles:detail' article.pk %}">상세 페이지</a>
     <hr>
   {% endfor %}
+  {% block script %}
+  <script>
+    const likeform = document.querySelectorAll('#like_form')
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value
+    const change = function (event)  {
+      event.preventDefault()
+      const articleid = event.target.dataset.articleId
+      console.log(event)
+      console.log(csrftoken)
+
+      axios({
+        method:'POST',
+        url : `${ articleid }/likes/`,
+        headers : {
+          'X-CSRFToken' : csrftoken,
+        }
+      })
+      .then( (response) => {
+        const likebtn = event.target.querySelector('input[type=submit]')
+        console.log(likebtn)
+        const is_like = response.data.article_like
+        if (is_like === true) {
+          likebtn.value = '좋아요 취소'
+        } else {
+          likebtn.value = '좋아요'
+        }
+      })
+    }
+    likeform.forEach(element => {
+      element.addEventListener('submit', change)
+    });
+  </script>
+  {% endblock script %}
+
 {% endblock content %}

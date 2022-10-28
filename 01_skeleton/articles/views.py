@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 # from django.http import HttpResponse, HttpResponseForbidden
 from .models import Article, Comment
 from .forms import ArticleForm, CommentForm
-
+from django.http import JsonResponse
 
 # Create your views here.
 @require_safe
@@ -114,11 +114,20 @@ def comments_delete(request, article_pk, comment_pk):
 @require_POST
 def likes(request, article_pk):
     if request.user.is_authenticated:
+        print(True)
         article = Article.objects.get(pk=article_pk)
         if article.like_users.filter(pk=request.user.pk).exists():
             article.like_users.remove(request.user)
+            article_like = False
         else:
             article.like_users.add(request.user)
-        return redirect('articles:index')
+            article_like = True
+        like_count = article.like_users.count()
+        context = {
+            'article_like':article_like,
+            'like_count' : like_count
+        }
+        return JsonResponse(context)
+    print(False)
     return redirect('accounts:login')
     
